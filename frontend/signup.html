@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TazaBolsyn – Sign Up</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/darkmode.css" />
+</head>
+</head>
+<body data-page="signup">
+  <header class="site-header">
+    <div class="container">
+      <div class="nav">
+        <a href="homepage.html" class="logo">
+          <div class="logo-icon">TB</div>
+          <span>TazaBolsyn</span>
+        </a>
+        <nav class="nav-links">
+          <a href="homepage.html">Home</a>
+          <a href="calculation.html">Calculator</a>
+          <a href="login.html">Login</a>
+          <a href="signup.html" class="active">Sign up</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" type="button" data-theme-toggle>
+            <span class="theme-toggle-icon theme-toggle-icon--light">🌙</span>
+            <span class="theme-toggle-icon theme-toggle-icon--dark">☀️</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <h1 class="auth-title">Create your account ✨</h1>
+        <p class="auth-subtitle">Book professional cleaning in just a few clicks.</p>
+
+        <div id="signup-message" class="auth-message hidden"></div>
+
+        <form id="signup-form" class="auth-form">
+          <div class="grid grid-2" style="gap: 0.75rem;">
+            <div class="input-group">
+              <label for="name">Name</label>
+              <input class="input" type="text" id="name" name="name" placeholder="Aruzhan" required />
+            </div>
+            <div class="input-group">
+              <label for="surname">Surname</label>
+              <input class="input" type="text" id="surname" name="surname" placeholder="Khan" required />
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input class="input" type="email" id="email" name="email" required placeholder="you@example.com" />
+          </div>
+          <div class="input-group">
+            <label for="city">City</label>
+            <select id="city" name="city" class="select">
+              <option value="">Select your city</option>
+              <option value="Almaty">Almaty</option>
+              <option value="Astana">Astana</option>
+              <option value="Shymkent">Shymkent</option>
+              <option value="Karaganda">Karaganda</option>
+              <option value="Aktobe">Aktobe</option>
+              <option value="Pavlodar">Pavlodar</option>
+              <option value="Oskemen">Oskemen</option>
+              <option value="Semey">Semey</option>
+              <option value="Atyrau">Atyrau</option>
+              <option value="Kostanay">Kostanay</option>
+              <option value="Kyzylorda">Kyzylorda</option>
+              <option value="Taraz">Taraz</option>
+              <option value="Petropavl">Petropavl</option>
+              <option value="Temirtau">Temirtau</option>
+              <option value="Oral">Oral</option>
+              <option value="Ekibastuz">Ekibastuz</option>
+              <option value="Aktau">Aktau</option>
+            </select>
+          </div>
+          <div class="grid grid-2" style="gap: 0.75rem;">
+            <div class="input-group">
+              <label for="password">Password</label>
+              <input
+                class="input"
+                type="password"
+                id="password"
+                name="password"
+                required
+                minlength="8"
+                placeholder="At least 8 characters"
+              />
+              <div id="password-strength" class="password-strength hidden">
+                <div class="password-strength-bar">
+                  <div id="password-strength-fill" class="password-strength-fill"></div>
+                </div>
+                <span id="password-strength-text" class="password-strength-text"></span>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="password_confirm">Confirm password</label>
+              <input
+                class="input"
+                type="password"
+                id="password_confirm"
+                name="password_confirm"
+                required
+                minlength="8"
+              />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-pill">Create account</button>
+        </form>
+
+        <div class="auth-footer">
+          Already have an account? <a href="login.html">Log in</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> TazaBolsyn. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
+
+

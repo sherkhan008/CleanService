@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TazaBolsyn – Cleaner Dashboard</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/darkmode.css" />
+</head>
+<body data-page="cleaner">
+  <header class="site-header">
+    <div class="container">
+      <div class="nav">
+        <a href="homepage.html" class="logo">
+          <div class="logo-icon">TB</div>
+          <span>TazaBolsyn</span>
+        </a>
+        <nav class="nav-links">
+          <a href="homepage.html">Home</a>
+          <a href="cleaner.html" class="active">Cleaner dashboard</a>
+        </nav>
+        <div class="nav-actions">
+          <button id="logout-btn" class="btn btn-outline btn-pill">Logout</button>
+          <button class="theme-toggle" type="button" data-theme-toggle>
+            <span class="theme-toggle-icon theme-toggle-icon--light">🌙</span>
+            <span class="theme-toggle-icon theme-toggle-icon--dark">☀️</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="section-header" style="text-align: left;">
+        <h2 class="section-title">My assigned orders</h2>
+        <p class="section-subtitle">
+          View your upcoming cleanings and update their status as you progress.
+        </p>
+      </div>
+
+      <div class="card">
+        <div style="overflow-x: auto;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Address</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cleaner-orders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> TazaBolsyn. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+  <script src="js/theme.js"></script>
+  <script src="js/cleaner.js"></script>
+</body>
+</html>
+
+

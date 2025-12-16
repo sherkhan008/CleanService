@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TazaBolsyn – My Account</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/darkmode.css" />
+</head>
+<body data-page="account">
+  <header class="site-header">
+    <div class="container">
+      <div class="nav">
+        <a href="homepage.html" class="logo">
+          <div class="logo-icon">TB</div>
+          <span>TazaBolsyn</span>
+        </a>
+        <nav class="nav-links">
+          <a href="homepage.html">Home</a>
+          <a href="calculation.html">Calculator</a>
+          <a href="account.html" class="active">My account</a>
+        </nav>
+        <div class="nav-actions">
+          <button id="logout-btn" class="btn btn-outline btn-pill">Logout</button>
+          <button class="theme-toggle" type="button" data-theme-toggle>
+            <span class="theme-toggle-icon theme-toggle-icon--light">🌙</span>
+            <span class="theme-toggle-icon theme-toggle-icon--dark">☀️</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="section-header" style="text-align: left;">
+        <h2 class="section-title">Account overview</h2>
+        <p class="section-subtitle">
+          Manage your personal details, addresses, 2FA security, and view your order history.
+        </p>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="feature-title">Profile</h3>
+          <p class="text-muted text-sm">Keep your information up to date so we can reach you easily.</p>
+          <form id="profile-form" class="mt-4">
+            <div class="grid grid-2" style="gap: 0.75rem;">
+              <div class="input-group">
+                <label for="name">Name</label>
+                <input id="name" name="name" class="input" type="text" required />
+              </div>
+              <div class="input-group">
+                <label for="surname">Surname</label>
+                <input id="surname" name="surname" class="input" type="text" required />
+              </div>
+            </div>
+            <div class="input-group mt-2">
+              <label for="email">Email</label>
+              <input id="email" name="email" class="input" type="email" disabled />
+            </div>
+            <div class="input-group mt-2">
+              <label for="city">City</label>
+              <select id="city" name="city" class="select">
+                <option value="">Select your city</option>
+                <option value="Almaty">Almaty</option>
+                <option value="Astana">Astana</option>
+                <option value="Shymkent">Shymkent</option>
+                <option value="Karaganda">Karaganda</option>
+                <option value="Aktobe">Aktobe</option>
+                <option value="Pavlodar">Pavlodar</option>
+                <option value="Oskemen">Oskemen</option>
+                <option value="Semey">Semey</option>
+                <option value="Atyrau">Atyrau</option>
+                <option value="Kostanay">Kostanay</option>
+                <option value="Kyzylorda">Kyzylorda</option>
+                <option value="Taraz">Taraz</option>
+                <option value="Petropavl">Petropavl</option>
+                <option value="Temirtau">Temirtau</option>
+                <option value="Oral">Oral</option>
+                <option value="Ekibastuz">Ekibastuz</option>
+                <option value="Aktau">Aktau</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-pill mt-4">Save changes</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="flex justify-between items-center">
+            <h3 class="feature-title">Rewards & Security</h3>
+          </div>
+          <div class="mt-2">
+            <div class="chip">
+              Reward points: <strong id="reward-points">0</strong>
+            </div>
+            <p class="text-muted text-sm mt-2">
+              Earn 1 point for every 1000₸ spent on your orders. Use points for discounts and special offers.
+            </p>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid var(--color-border); margin: 1.25rem 0;" />
+
+          <div>
+            <h4 class="feature-title">Two‑factor authentication (2FA)</h4>
+            <p class="text-muted text-sm">
+              Add an extra layer of security by enabling TOTP-based 2FA with apps like Google Authenticator.
+            </p>
+            <div class="mt-2 text-sm">
+              Status:
+              <span id="totp-status" class="pill-status pending">Checking…</span>
+            </div>
+            <button id="enable-totp-btn" class="btn btn-secondary btn-pill mt-3">Enable 2FA</button>
+            <div id="totp-info" class="mt-3 text-sm text-muted"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="feature-title">Saved addresses</h3>
+          <p class="text-muted text-sm">Save your frequent locations for faster booking.</p>
+
+          <form id="address-form" class="mt-3">
+            <div class="input-group">
+              <label for="address">Address</label>
+              <input id="address" name="address" class="input" type="text" required placeholder="Street, house" />
+            </div>
+            <div class="input-group mt-2">
+              <label for="apartment">Apartment (optional)</label>
+              <input id="apartment" name="apartment" class="input" type="text" placeholder="e.g. 25B" />
+            </div>
+            <button type="submit" class="btn btn-outline btn-full btn-pill mt-3">Add address</button>
+          </form>
+
+          <div id="address-list" class="mt-4"></div>
+        </div>
+
+        <div class="card">
+          <h3 class="feature-title">My recent orders</h3>
+          <p class="text-muted text-sm">Track your upcoming and past cleanings.</p>
+          <div class="mt-3" style="overflow-x: auto;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Date</th>
+                  <th>Address</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th>Services</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> TazaBolsyn. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+  <script src="js/theme.js"></script>
+  <script src="js/account.js"></script>
+</body>
+</html>
+
+

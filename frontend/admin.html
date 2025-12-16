@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TazaBolsyn – Admin Panel</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/darkmode.css" />
+</head>
+<body data-page="admin">
+  <header class="site-header">
+    <div class="container">
+      <div class="nav">
+        <a href="homepage.html" class="logo">
+          <div class="logo-icon">TB</div>
+          <span>TazaBolsyn</span>
+        </a>
+        <nav class="nav-links">
+          <a href="homepage.html">Home</a>
+          <a href="admin.html" class="active">Admin</a>
+        </nav>
+        <div class="nav-actions">
+          <button id="logout-btn" class="btn btn-outline btn-pill">Logout</button>
+          <button class="theme-toggle" type="button" data-theme-toggle>
+            <span class="theme-toggle-icon theme-toggle-icon--light">🌙</span>
+            <span class="theme-toggle-icon theme-toggle-icon--dark">☀️</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="section-header" style="text-align: left;">
+        <h2 class="section-title">Admin dashboard</h2>
+        <p class="section-subtitle">
+          Manage cleaners, users, and all cleaning orders in one place.
+        </p>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="feature-title">Create cleaner</h3>
+          <p class="text-muted text-sm">
+            Promote an existing user to a cleaner and manage their availability.
+          </p>
+          <form id="create-cleaner-form" class="mt-3">
+            <div class="input-group">
+              <label for="user-select">Select user</label>
+              <select id="user-select" name="user_id" class="select" required>
+                <option value="">Loading users...</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-pill mt-3">
+              Create cleaner
+            </button>
+          </form>
+
+          <hr style="border: none; border-top: 1px solid var(--color-border); margin: 1.5rem 0;" />
+
+          <h3 class="feature-title">Cleaners</h3>
+          <p class="text-muted text-sm">Overview of all active cleaners.</p>
+          <div class="input-group mt-2">
+            <label for="cleaner-select">Cleaners</label>
+            <select id="cleaner-select" class="select">
+              <option value="">Loading cleaners...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="feature-title">Manage orders</h3>
+          <p class="text-muted text-sm">
+            Assign cleaners and update order statuses.
+          </p>
+
+          <form id="order-assign-form" class="mt-3">
+            <div class="grid grid-2" style="gap: 0.75rem;">
+              <div class="input-group">
+                <label for="order_id">Order ID</label>
+                <input id="order_id" name="order_id" class="input" type="number" placeholder="Click a row to fill" />
+              </div>
+              <div class="input-group">
+                <label for="status">Status</label>
+                <select id="status" name="status" class="select">
+                  <option value="">No change</option>
+                  <option value="pending">Pending</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="going">Going to your home</option>
+                  <option value="started">Started cleaning</option>
+                  <option value="finished">Finished</option>
+                  <option value="paid">Paid</option>
+                </select>
+              </div>
+            </div>
+            <div class="input-group mt-2">
+              <label for="cleaner_id">Assign cleaner</label>
+              <select id="cleaner_id" name="cleaner_id" class="select">
+                <option value="">No change</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-pill mt-3">
+              Update order
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <h3 class="feature-title">All orders</h3>
+        <p class="text-muted text-sm">Click an order row to select it for updates.</p>
+        <div style="overflow-x: auto; margin-top: 1rem;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Services</th>
+                <th>Cleaner</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> TazaBolsyn. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+  <script src="js/theme.js"></script>
+  <script src="js/account_admin.js"></script>
+</body>
+</html>
+
+

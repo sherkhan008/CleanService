@@ -1,0 +1,43 @@
+/* Dark / light mode helpers */
+
+.theme-toggle {
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(148, 163, 184, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15);
+}
+
+.theme-toggle-icon {
+  font-size: 1rem;
+}
+
+body.dark-mode .theme-toggle {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+body.dark-mode .theme-toggle-icon--light {
+  display: none;
+}
+
+body.dark-mode .theme-toggle-icon--dark {
+  display: inline;
+}
+
+.theme-toggle-icon--dark {
+  display: none;
+}
+
+

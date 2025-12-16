@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TazaBolsyn – Reset Password</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/darkmode.css" />
+</head>
+<body data-page="reset">
+  <header class="site-header">
+    <div class="container">
+      <div class="nav">
+        <a href="homepage.html" class="logo">
+          <div class="logo-icon">TB</div>
+          <span>TazaBolsyn</span>
+        </a>
+        <nav class="nav-links">
+          <a href="homepage.html">Home</a>
+          <a href="calculation.html">Calculator</a>
+          <a href="login.html">Login</a>
+          <a href="signup.html">Sign up</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" type="button" data-theme-toggle>
+            <span class="theme-toggle-icon theme-toggle-icon--light">🌙</span>
+            <span class="theme-toggle-icon theme-toggle-icon--dark">☀️</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <h1 class="auth-title">Enter your reset code</h1>
+        <p class="auth-subtitle">
+          Check your email for the 6-digit confirmation code, then choose a new password.
+        </p>
+
+        <div id="reset-message" class="auth-message hidden"></div>
+
+        <form id="reset-form" class="auth-form">
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input class="input" type="email" id="email" name="email" required placeholder="you@example.com" />
+          </div>
+          <div class="input-group">
+            <label for="code">6-digit code</label>
+            <input
+              class="input totp-input"
+              type="text"
+              id="code"
+              name="code"
+              required
+              inputmode="numeric"
+              maxlength="6"
+              pattern="\\d{6}"
+              placeholder="123456"
+            />
+          </div>
+          <div class="input-group">
+            <label for="new_password">New password</label>
+            <input
+              class="input"
+              type="password"
+              id="new_password"
+              name="new_password"
+              required
+              minlength="8"
+              placeholder="At least 8 characters"
+            />
+            <div id="password-strength" class="password-strength hidden">
+              <div class="password-strength-bar">
+                <div id="password-strength-fill" class="password-strength-fill"></div>
+              </div>
+              <span id="password-strength-text" class="password-strength-text"></span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-pill">Update password</button>
+        </form>
+
+        <div class="auth-footer">
+          <a href="login.html">Back to login</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> TazaBolsyn. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
+
+
