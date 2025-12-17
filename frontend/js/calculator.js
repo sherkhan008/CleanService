@@ -38,6 +38,19 @@ function authHeadersCalc() {
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
   if (page !== "calculation") return;
+  if (window.notify?.flash?.consume) window.notify.flash.consume();
+
+  // 2GIS map address picker (lazy-loads when visible)
+  if (window.Map2GIS?.initAddressPicker) {
+    window.Map2GIS.initAddressPicker({
+      rootId: "dg-map-root",
+      mapId: "dg-map",
+      searchInputId: "dg-search",
+      addressInputId: "address",
+      latInputId: "latitude",
+      lngInputId: "longitude",
+    });
+  }
 
   const servicesContainer = document.getElementById("services-list");
   const receiptList = document.getElementById("receipt-list");
@@ -186,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const token = getTokenCalc();
       if (!token) {
-        alert("Please login first.");
+        if (window.notify) window.notify.info("Please log in to place an order.");
         window.location.href = "login.html";
         return;
       }
@@ -204,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (!items.length) {
-        alert("Please select at least one additional option.");
+        if (window.notify) window.notify.error("Please select at least one additional option.");
         return;
       }
 
@@ -217,6 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
         apartment: orderForm.apartment.value.trim() || null,
         city: orderForm.city.value.trim() || null,
         phone: orderForm.phone.value.trim() || null,
+        latitude: orderForm.latitude ? parseFloat(orderForm.latitude.value || "") || null : null,
+        longitude: orderForm.longitude ? parseFloat(orderForm.longitude.value || "") || null : null,
         items,
       };
 
@@ -228,14 +243,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (!res.ok) {
-          alert(data?.detail || "Failed to create order.");
+          if (window.notify) window.notify.error("Could not place your order. Please try again.");
           return;
         }
-        alert("Order created! Thank you.");
+        if (window.notify?.flash?.set) window.notify.flash.set("success", "Order submitted successfully.");
         window.location.href = "account.html";
       } catch (err) {
         console.error(err);
-        alert("Network error.");
+        if (window.notify) window.notify.error("Network error. Please try again.");
       }
     });
   }

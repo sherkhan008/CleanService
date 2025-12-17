@@ -129,11 +129,20 @@
               <input id="address" name="address" class="input" type="text" required placeholder="Street, house" />
             </div>
             <div class="input-group mt-2">
+              <label for="dg-search-account">Find on map</label>
+              <input id="dg-search-account" class="input" type="text" placeholder="Start typing an address…" />
+            </div>
+            <input type="hidden" id="latitude" name="latitude" />
+            <input type="hidden" id="longitude" name="longitude" />
+            <div class="input-group mt-2">
               <label for="apartment">Apartment (optional)</label>
               <input id="apartment" name="apartment" class="input" type="text" placeholder="e.g. 25B" />
             </div>
             <button type="submit" class="btn btn-outline btn-full btn-pill mt-3">Add address</button>
           </form>
+          <div id="dg-map-root-account" class="card mt-3" style="padding: 0; overflow: hidden;">
+            <div id="dg-map-account" style="width: 100%; height: 260px;"></div>
+          </div>
 
           <div id="address-list" class="mt-4"></div>
         </div>
@@ -177,6 +186,8 @@
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
   <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/map_2gis.js"></script>
   <script src="js/account.js"></script>
 </body>
 </html>

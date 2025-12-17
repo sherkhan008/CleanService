@@ -18,6 +18,7 @@ function authHeadersAdmin() {
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
   if (page !== "admin") return;
+  if (window.notify?.flash?.consume) window.notify.flash.consume();
 
   const token = getTokenAdmin();
   if (!token) {
@@ -29,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cleanersSelect = document.getElementById("cleaner-select");
   const ordersTbody = document.getElementById("admin-orders-tbody");
   const createCleanerForm = document.getElementById("create-cleaner-form");
+  const createCleanerAccountForm = document.getElementById("create-cleaner-account-form");
   const orderAssignForm = document.getElementById("order-assign-form");
 
   async function loadUsers() {
@@ -38,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
-          alert("You must be logged in as an admin.");
+          if (window.notify) window.notify.error("Please log in as an admin.");
           window.location.href = "login.html";
           return;
         }
@@ -137,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const userId = createCleanerForm.user_id.value;
       if (!userId) {
-        alert("Please select a user.");
+        if (window.notify) window.notify.error("Please select a user.");
         return;
       }
       try {
@@ -148,16 +150,61 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (!res.ok) {
-          alert(data?.detail || "Failed to create cleaner.");
+          if (window.notify) window.notify.error("Could not create cleaner. Please try again.");
           return;
         }
-        alert("Cleaner created.");
+        if (window.notify) window.notify.success("Cleaner created successfully.");
         createCleanerForm.reset();
         loadCleaners();
         loadOrders();
       } catch (err) {
         console.error(err);
-        alert("Network error.");
+        if (window.notify) window.notify.error("Network error. Please try again.");
+      }
+    });
+  }
+
+  if (createCleanerAccountForm) {
+    createCleanerAccountForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const body = {
+        name: createCleanerAccountForm.name.value.trim(),
+        surname: createCleanerAccountForm.surname.value.trim(),
+        email: createCleanerAccountForm.email.value.trim(),
+        password: createCleanerAccountForm.password.value,
+        city: createCleanerAccountForm.city.value.trim() || null,
+      };
+
+      if (!body.name || !body.surname || !body.email || !body.password) {
+        if (window.notify) window.notify.error("Please fill in all required fields.");
+        return;
+      }
+      if (body.password.length < 8) {
+        if (window.notify) window.notify.error("Password must be at least 8 characters.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_ADMIN}/admin/cleaners/create-account`, {
+          method: "POST",
+          headers: authHeadersAdmin(),
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          const friendly = data?.detail === "Email is already registered"
+            ? "That email is already registered."
+            : "Could not create the cleaner account. Please try again.";
+          if (window.notify) window.notify.error(friendly);
+          return;
+        }
+        if (window.notify) window.notify.success("Cleaner account created successfully.");
+        createCleanerAccountForm.reset();
+        loadUsers();
+        loadCleaners();
+      } catch (err) {
+        console.error(err);
+        if (window.notify) window.notify.error("Network error. Please try again.");
       }
     });
   }
@@ -170,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const status = orderAssignForm.status.value;
 
       if (!orderId) {
-        alert("Select an order from the table first.");
+        if (window.notify) window.notify.error("Select an order from the table first.");
         return;
       }
 
@@ -186,14 +233,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (!res.ok) {
-          alert(data?.detail || "Failed to update order.");
+          if (window.notify) window.notify.error("Could not update the order. Please try again.");
           return;
         }
-        alert("Order updated.");
+        if (window.notify) window.notify.success("Order updated successfully.");
         loadOrders();
       } catch (err) {
         console.error(err);
-        alert("Network error.");
+        if (window.notify) window.notify.error("Network error. Please try again.");
       }
     });
   }
@@ -211,5 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadCleaners();
   loadOrders();
 });
+
 
 

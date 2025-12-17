@@ -19,12 +19,15 @@ def _user_to_schema(user: models.User) -> schemas.User:
         role=user.role,
         city=user.city,
         reward_points=user.reward_points,
-        totp_enabled=bool(user.totp_secret),
+        totp_enabled=bool(user.is_totp_enabled and user.totp_secret),
+        totp_setup_pending=bool(user.totp_secret and not user.is_totp_enabled),
         addresses=[
             schemas.Address(
                 id=addr.id,
                 address=addr.address,
                 apartment=addr.apartment,
+                latitude=addr.latitude,
+                longitude=addr.longitude,
             )
             for addr in user.addresses
         ],
@@ -71,7 +74,13 @@ def list_my_addresses(
     List saved addresses for the current user.
     """
     return [
-        schemas.Address(id=a.id, address=a.address, apartment=a.apartment)
+        schemas.Address(
+            id=a.id,
+            address=a.address,
+            apartment=a.apartment,
+            latitude=a.latitude,
+            longitude=a.longitude,
+        )
         for a in current_user.addresses
     ]
 
@@ -89,11 +98,19 @@ def add_address(
         user_id=current_user.id,
         address=payload.address,
         apartment=payload.apartment,
+        latitude=payload.latitude,
+        longitude=payload.longitude,
     )
     db.add(addr)
     db.commit()
     db.refresh(addr)
-    return schemas.Address(id=addr.id, address=addr.address, apartment=addr.apartment)
+    return schemas.Address(
+        id=addr.id,
+        address=addr.address,
+        apartment=addr.apartment,
+        latitude=addr.latitude,
+        longitude=addr.longitude,
+    )
 
 
 @router.delete("/me/addresses/{address_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -158,5 +175,6 @@ def list_my_orders(
         )
         for o in orders
     ]
+
 
 

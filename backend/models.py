@@ -24,6 +24,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     role = Column(String(50), default="user", nullable=False)  # user | cleaner | admin
     totp_secret = Column(String(64), nullable=True)
+    is_totp_enabled = Column(Boolean, default=False, nullable=False)
     city = Column(String(120), nullable=True)
     reward_points = Column(Integer, default=0, nullable=False)
     reset_code = Column(String(6), nullable=True)
@@ -50,6 +51,8 @@ class Address(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     address = Column(String(255), nullable=False)
     apartment = Column(String(50), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
 
     user = relationship("User", back_populates="addresses")
 
@@ -76,6 +79,8 @@ class Order(Base):
     apartment = Column(String(50), nullable=True)
     city = Column(String(120), nullable=True)
     phone = Column(String(50), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
 
     user = relationship("User", foreign_keys=[user_id], back_populates="orders")
     cleaner = relationship("User", foreign_keys=[cleaner_id])

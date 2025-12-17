@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..auth import require_role
+from ..auth import get_password_hash
 from ..database import get_db
 
 router = APIRouter()
@@ -56,12 +57,15 @@ def list_users(
             role=u.role,
             city=u.city,
             reward_points=u.reward_points,
-            totp_enabled=bool(u.totp_secret),
+            totp_enabled=bool(u.is_totp_enabled and u.totp_secret),
+            totp_setup_pending=bool(u.totp_secret and not u.is_totp_enabled),
             addresses=[
                 schemas.Address(
                     id=a.id,
                     address=a.address,
                     apartment=a.apartment,
+                    latitude=a.latitude,
+                    longitude=a.longitude,
                 )
                 for a in u.addresses
             ],
@@ -108,12 +112,79 @@ def create_cleaner(
             role=user.role,
             city=user.city,
             reward_points=user.reward_points,
-            totp_enabled=bool(user.totp_secret),
+            totp_enabled=bool(user.is_totp_enabled and user.totp_secret),
+            totp_setup_pending=bool(user.totp_secret and not user.is_totp_enabled),
             addresses=[
                 schemas.Address(
                     id=a.id,
                     address=a.address,
                     apartment=a.apartment,
+                    latitude=a.latitude,
+                    longitude=a.longitude,
+                )
+                for a in user.addresses
+            ],
+        ),
+    )
+
+
+@router.post(
+    "/cleaners/create-account",
+    response_model=schemas.Cleaner,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_cleaner_account(
+    payload: schemas.CleanerAccountCreate,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(require_role("admin")),
+) -> schemas.Cleaner:
+    """
+    Create a new cleaner account (admin only).
+    """
+    existing = db.query(models.User).filter(models.User.email == payload.email).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is already registered",
+        )
+
+    user = models.User(
+        name=payload.name,
+        surname=payload.surname,
+        email=payload.email,
+        password_hash=get_password_hash(payload.password),
+        role="cleaner",
+        city=payload.city,
+    )
+    db.add(user)
+    db.flush()  # get user.id
+
+    cleaner = models.Cleaner(user_id=user.id, availability=True)
+    db.add(cleaner)
+    db.commit()
+    db.refresh(cleaner)
+
+    return schemas.Cleaner(
+        id=cleaner.id,
+        user_id=cleaner.user_id,
+        availability=cleaner.availability,
+        user=schemas.User(
+            id=user.id,
+            name=user.name,
+            surname=user.surname,
+            email=user.email,
+            role=user.role,
+            city=user.city,
+            reward_points=user.reward_points,
+            totp_enabled=bool(user.is_totp_enabled and user.totp_secret),
+            totp_setup_pending=bool(user.totp_secret and not user.is_totp_enabled),
+            addresses=[
+                schemas.Address(
+                    id=a.id,
+                    address=a.address,
+                    apartment=a.apartment,
+                    latitude=a.latitude,
+                    longitude=a.longitude,
                 )
                 for a in user.addresses
             ],
@@ -143,12 +214,15 @@ def list_cleaners(
                 role=c.user.role,
                 city=c.user.city,
                 reward_points=c.user.reward_points,
-                totp_enabled=bool(c.user.totp_secret),
+                totp_enabled=bool(c.user.is_totp_enabled and c.user.totp_secret),
+                totp_setup_pending=bool(c.user.totp_secret and not c.user.is_totp_enabled),
                 addresses=[
                     schemas.Address(
                         id=a.id,
                         address=a.address,
                         apartment=a.apartment,
+                        latitude=a.latitude,
+                        longitude=a.longitude,
                     )
                     for a in c.user.addresses
                 ],
@@ -208,5 +282,6 @@ def update_order_admin(
     db.commit()
     db.refresh(order)
     return _order_to_schema(order)
+
 
 

@@ -28,6 +28,8 @@ def _order_to_schema(order: models.Order) -> schemas.Order:
         apartment=order.apartment,
         city=order.city,
         phone=order.phone,
+        latitude=order.latitude,
+        longitude=order.longitude,
         items=[
             schemas.OrderItem(
                 id=i.id,
@@ -87,5 +89,6 @@ def update_order_status(
     db.commit()
     db.refresh(order)
     return _order_to_schema(order)
+
 
 

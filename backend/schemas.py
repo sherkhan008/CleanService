@@ -10,6 +10,8 @@ from pydantic import BaseModel, EmailStr, Field
 class AddressBase(BaseModel):
     address: str = Field(..., max_length=255)
     apartment: Optional[str] = Field(default=None, max_length=50)
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class AddressCreate(AddressBase):
@@ -50,6 +52,8 @@ class OrderBase(BaseModel):
     apartment: Optional[str] = None
     city: Optional[str] = None
     phone: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class OrderCreate(OrderBase):
@@ -92,6 +96,7 @@ class User(UserBase):
     role: str
     reward_points: int = 0
     totp_enabled: bool = False
+    totp_setup_pending: bool = False
     addresses: List[Address] = []
 
     class Config:
@@ -131,6 +136,28 @@ class CleanerBase(BaseModel):
 
 class CleanerCreate(CleanerBase):
     user_id: int
+
+
+class CleanerAccountCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    surname: str = Field(..., min_length=1, max_length=100)
+    email: EmailStr
+    password: str = Field(..., min_length=8)
+    city: Optional[str] = None
+
+
+class TotpSetupResponse(BaseModel):
+    qr_code_base64: str
+    message: str
+
+
+class TotpVerifyRequest(BaseModel):
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class TotpVerifyResponse(BaseModel):
+    totp_enabled: bool
+    message: str
 
 
 class Cleaner(CleanerBase):

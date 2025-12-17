@@ -37,6 +37,19 @@ function authHeaders() {
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
   if (page !== "account") return;
+  if (window.notify?.flash?.consume) window.notify.flash.consume();
+
+  // 2GIS map address picker for saved addresses (lazy-loads when visible)
+  if (window.Map2GIS?.initAddressPicker) {
+    window.Map2GIS.initAddressPicker({
+      rootId: "dg-map-root-account",
+      mapId: "dg-map-account",
+      searchInputId: "dg-search-account",
+      addressInputId: "address",
+      latInputId: "latitude",
+      lngInputId: "longitude",
+    });
+  }
 
   const token = ensureAuthenticated();
   if (!token) return;
@@ -71,7 +84,14 @@ document.addEventListener("DOMContentLoaded", () => {
       populateAddresses(user.addresses || []);
       if (rewardsEl) rewardsEl.textContent = user.reward_points ?? 0;
       if (totpStatus) {
-        totpStatus.textContent = user.totp_enabled ? "Enabled" : "Disabled";
+        totpStatus.textContent = user.totp_enabled
+          ? "Enabled"
+          : user.totp_setup_pending
+            ? "Pending"
+            : "Disabled";
+      }
+      if (totpBtn) {
+        totpBtn.disabled = Boolean(user.totp_enabled || user.totp_setup_pending);
       }
       fetchOrders();
     } catch (err) {
@@ -163,15 +183,15 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify(body),
         });
         if (!res.ok) {
-          alert("Failed to update profile.");
+          if (window.notify) window.notify.error("Could not update your profile. Please try again.");
           return;
         }
         const user = await res.json();
         localStorage.setItem(USER_KEY, JSON.stringify(user));
-        alert("Profile updated.");
+        if (window.notify) window.notify.success("Profile updated successfully.");
       } catch (err) {
         console.error(err);
-        alert("Network error.");
+        if (window.notify) window.notify.error("Network error. Please try again.");
       }
     });
   }
@@ -182,21 +202,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const address = addressForm.address.value.trim();
       const apartment = addressForm.apartment.value.trim();
       if (!address) return;
+      const latitude = addressForm.latitude ? parseFloat(addressForm.latitude.value || "") || null : null;
+      const longitude = addressForm.longitude ? parseFloat(addressForm.longitude.value || "") || null : null;
       try {
         const res = await fetch(`${API_BASE}/users/me/addresses`, {
           method: "POST",
           headers: authHeaders(),
-          body: JSON.stringify({ address, apartment: apartment || null }),
+          body: JSON.stringify({ address, apartment: apartment || null, latitude, longitude }),
         });
         if (!res.ok) {
-          alert("Failed to add address.");
+          if (window.notify) window.notify.error("Could not save the address. Please try again.");
           return;
         }
         addressForm.reset();
+        if (addressForm.latitude) addressForm.latitude.value = "";
+        if (addressForm.longitude) addressForm.longitude.value = "";
+        if (window.notify) window.notify.success("Address saved.");
         fetchProfile();
       } catch (err) {
         console.error(err);
-        alert("Network error.");
+        if (window.notify) window.notify.error("Network error. Please try again.");
       }
     });
 
@@ -211,13 +236,14 @@ document.addEventListener("DOMContentLoaded", () => {
           headers: authHeaders(),
         });
         if (!res.ok) {
-          alert("Failed to remove address.");
+          if (window.notify) window.notify.error("Could not remove the address. Please try again.");
           return;
         }
+        if (window.notify) window.notify.success("Address removed.");
         fetchProfile();
       } catch (err) {
         console.error(err);
-        alert("Network error.");
+        if (window.notify) window.notify.error("Network error. Please try again.");
       }
     });
   }
@@ -231,21 +257,64 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (!res.ok) {
-          alert(data?.detail || "Failed to enable 2FA.");
+          const friendly =
+            data?.detail === "TOTP_SETUP_PENDING"
+              ? "2FA setup is already in progress. Please finish setup without refreshing."
+              : data?.detail === "TOTP_ALREADY_ENABLED"
+                ? "Two-factor authentication is already enabled."
+                : "Could not start 2FA setup. Please try again later.";
+          if (window.notify) window.notify.error(friendly);
           return;
         }
-        totpStatus.textContent = "Enabled";
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-          data.otpauth_url
-        )}`;
+        totpStatus.textContent = "Pending";
+        totpBtn.disabled = true;
+        const qrUrl = `data:image/png;base64,${data.qr_code_base64}`;
         totpInfo.innerHTML = `
-          <p class="text-sm mb-2">Scan this QR code with Google Authenticator, Authy, or another TOTP app.</p>
+          <p class="text-sm mb-2">Scan this QR code with Google Authenticator (or similar), then enter the 6-digit code to activate.</p>
           <img src="${qrUrl}" alt="TOTP QR code" />
-          <p class="text-xs text-muted mt-2">Or enter this code manually: <strong>${data.secret}</strong></p>
+          <div class="input-group mt-3" style="max-width: 260px;">
+            <label for="totp-verify-code">6-digit code</label>
+            <input class="input totp-input" id="totp-verify-code" inputmode="numeric" maxlength="6" pattern="\\d{6}" placeholder="123456" />
+          </div>
+          <button id="totp-verify-btn" class="btn btn-primary btn-pill mt-2">Confirm activation</button>
+          <p class="text-xs text-muted mt-2">Important: This QR code is shown only once. Please finish setup now.</p>
         `;
+        const verifyBtn = document.getElementById("totp-verify-btn");
+        const codeInput = document.getElementById("totp-verify-code");
+        if (verifyBtn && codeInput) {
+          verifyBtn.addEventListener("click", async () => {
+            const code = codeInput.value.trim();
+            if (!/^\d{6}$/.test(code)) {
+              if (window.notify) window.notify.error("Please enter the 6-digit code from your authenticator app.");
+              return;
+            }
+            try {
+              const r = await fetch(`${API_BASE}/auth/totp/verify`, {
+                method: "POST",
+                headers: authHeaders(),
+                body: JSON.stringify({ code }),
+              });
+              const d = await r.json();
+              if (!r.ok) {
+                const friendly = d?.detail === "INVALID_TOTP"
+                  ? "That code is not correct. Please try again."
+                  : "Could not verify the code. Please try again.";
+                if (window.notify) window.notify.error(friendly);
+                return;
+              }
+              totpStatus.textContent = "Enabled";
+              totpInfo.innerHTML = `<p class="text-sm">Two-factor authentication is now enabled.</p>`;
+              if (window.notify) window.notify.success("2FA enabled successfully.");
+              fetchProfile();
+            } catch (err) {
+              console.error(err);
+              if (window.notify) window.notify.error("Network error. Please try again.");
+            }
+          });
+        }
       } catch (err) {
         console.error(err);
-        alert("Network error.");
+        if (window.notify) window.notify.error("Network error. Please try again.");
       }
     });
   }
@@ -261,5 +330,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fetchProfile();
 });
+
 
 

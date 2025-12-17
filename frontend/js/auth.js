@@ -126,6 +126,9 @@ function updatePasswordStrength(passwordInputId, strengthContainerId) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
+  if (window.notify?.flash?.consume) {
+    window.notify.flash.consume();
+  }
 
   // LOGIN
   const loginForm = document.getElementById("login-form");
@@ -159,17 +162,27 @@ document.addEventListener("DOMContentLoaded", () => {
               totpGroup.classList.remove("hidden");
               loginForm.totp.focus();
             }
+            if (window.notify) window.notify.info("Enter your 6-digit authentication code.");
             showMessage(msgId, "Please enter your 6-digit authentication code.", false);
             return;
           }
-          showMessage(msgId, data?.detail || "Login failed. Please try again.", true);
+          const friendly =
+            data?.detail === "INVALID_TOTP"
+              ? "That authentication code is not correct. Please try again."
+              : data?.detail === "Invalid email or password"
+                ? "Incorrect email or password. Please try again."
+                : "Login failed. Please try again.";
+          if (window.notify) window.notify.error(friendly);
+          showMessage(msgId, friendly, true);
           return;
         }
 
         saveAuth(data.access_token, data.user);
+        if (window.notify?.flash?.set) window.notify.flash.set("success", "Logged in successfully.");
         navigateAfterLogin(data.user);
       } catch (err) {
         console.error(err);
+        if (window.notify) window.notify.error("Network error. Please try again.");
         showMessage(msgId, "Network error. Please try again.", true);
       }
     });
@@ -203,6 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById(msgId).classList.add("hidden");
 
       if (body.password !== body.password_confirm) {
+        if (window.notify) window.notify.error("Passwords do not match.");
         showMessage(msgId, "Passwords do not match.", true);
         return;
       }
@@ -215,13 +229,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (!res.ok) {
-          showMessage(msgId, data?.detail || "Signup failed.", true);
+          const friendly = data?.detail || "Signup failed. Please try again.";
+          if (window.notify) window.notify.error(friendly);
+          showMessage(msgId, friendly, true);
           return;
         }
         saveAuth(data.access_token, data.user);
+        if (window.notify?.flash?.set) window.notify.flash.set("success", "Account created successfully.");
         navigateAfterLogin(data.user);
       } catch (err) {
         console.error(err);
+        if (window.notify) window.notify.error("Network error. Please try again.");
         showMessage(msgId, "Network error. Please try again.", true);
       }
     });
@@ -245,13 +263,16 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ email }),
         });
         const data = await res.json();
-        showMessage(msgId, data?.message || "If the email exists, a code was sent.");
+        const friendly = data?.message || "If an account exists for that email, a reset code has been sent.";
+        if (window.notify) window.notify.success("Reset email sent. Check your inbox.");
+        showMessage(msgId, friendly);
         localStorage.setItem(RESET_EMAIL_KEY, email);
         setTimeout(() => {
           window.location.href = "reset.html";
         }, 1200);
       } catch (err) {
         console.error(err);
+        if (window.notify) window.notify.error("Network error. Please try again.");
         showMessage(msgId, "Network error. Please try again.", true);
       }
     });
@@ -287,11 +308,13 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById(msgId).classList.add("hidden");
 
       if (!body.code || body.code.length !== 6) {
+        if (window.notify) window.notify.error("Please enter the 6-digit code.");
         showMessage(msgId, "Please enter the 6-digit code.", true);
         return;
       }
 
       if (!body.new_password || body.new_password.length < 8) {
+        if (window.notify) window.notify.error("Password must be at least 8 characters.");
         showMessage(msgId, "Password must be at least 8 characters.", true);
         return;
       }
@@ -304,16 +327,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (!res.ok) {
-          showMessage(msgId, data?.detail || "Reset failed.", true);
+          const friendly =
+            data?.detail === "Invalid reset code"
+              ? "That code is not correct. Please try again."
+              : data?.detail === "Reset code has expired"
+                ? "That code has expired. Please request a new one."
+                : data?.detail || "Password reset failed. Please try again.";
+          if (window.notify) window.notify.error(friendly);
+          showMessage(msgId, friendly, true);
           return;
         }
+        if (window.notify) window.notify.success("Password updated successfully.");
         showMessage(msgId, data?.message || "Password updated.", false);
         localStorage.removeItem(RESET_EMAIL_KEY);
         setTimeout(() => {
+          if (window.notify?.flash?.set) window.notify.flash.set("success", "You can now log in with your new password.");
           window.location.href = "login.html";
         }, 1500);
       } catch (err) {
         console.error(err);
+        if (window.notify) window.notify.error("Network error. Please try again.");
         showMessage(msgId, "Network error. Please try again.", true);
       }
     });

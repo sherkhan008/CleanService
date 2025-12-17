@@ -59,6 +59,40 @@
 
           <hr style="border: none; border-top: 1px solid var(--color-border); margin: 1.5rem 0;" />
 
+          <h3 class="feature-title">Create cleaner account</h3>
+          <p class="text-muted text-sm">
+            Create a new cleaner login (email + password) and assign the cleaner role automatically.
+          </p>
+          <form id="create-cleaner-account-form" class="mt-3">
+            <div class="grid grid-2" style="gap: 0.75rem;">
+              <div class="input-group">
+                <label for="cleaner_name">Name</label>
+                <input id="cleaner_name" name="name" class="input" type="text" required />
+              </div>
+              <div class="input-group">
+                <label for="cleaner_surname">Surname</label>
+                <input id="cleaner_surname" name="surname" class="input" type="text" required />
+              </div>
+            </div>
+            <div class="input-group mt-2">
+              <label for="cleaner_email">Email</label>
+              <input id="cleaner_email" name="email" class="input" type="email" required />
+            </div>
+            <div class="input-group mt-2">
+              <label for="cleaner_password">Password</label>
+              <input id="cleaner_password" name="password" class="input" type="password" minlength="8" required />
+            </div>
+            <div class="input-group mt-2">
+              <label for="cleaner_city">City (optional)</label>
+              <input id="cleaner_city" name="city" class="input" type="text" placeholder="e.g. Almaty" />
+            </div>
+            <button type="submit" class="btn btn-outline btn-full btn-pill mt-3">
+              Create cleaner account
+            </button>
+          </form>
+
+          <hr style="border: none; border-top: 1px solid var(--color-border); margin: 1.5rem 0;" />
+
           <h3 class="feature-title">Cleaners</h3>
           <p class="text-muted text-sm">Overview of all active cleaners.</p>
           <div class="input-group mt-2">
@@ -148,8 +182,10 @@
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
   <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
   <script src="js/account_admin.js"></script>
 </body>
 </html>
+
 
 

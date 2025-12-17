@@ -20,6 +20,7 @@ function authHeadersCleaner() {
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
   if (page !== "cleaner") return;
+  if (window.notify?.flash?.consume) window.notify.flash.consume();
 
   const token = getTokenCleaner();
   if (!token) {
@@ -38,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
-          alert("You must be logged in as a cleaner.");
+          if (window.notify) window.notify.error("Please log in as a cleaner.");
           window.location.href = "login.html";
           return;
         }
@@ -97,13 +98,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (!res.ok) {
-          alert(data?.detail || "Failed to update status.");
+          if (window.notify) window.notify.error("Could not update status. Please try again.");
           return;
         }
+        if (window.notify) window.notify.success("Status updated.");
         loadOrders();
       } catch (err) {
         console.error(err);
-        alert("Network error.");
+        if (window.notify) window.notify.error("Network error. Please try again.");
       }
     });
   }
@@ -119,5 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadOrders();
 });
+
 
 

@@ -133,9 +133,22 @@
                 <option value="Aktau">Aktau</option>
               </select>
             </div>
-            <div class="input-group mt-2">
-              <label for="address">Address</label>
-              <input id="address" name="address" class="input" type="text" placeholder="Street, house" required />
+            <div class="grid grid-2 mt-2" style="gap: 0.75rem; align-items: start;">
+              <div>
+                <div class="input-group">
+                  <label for="address">Address</label>
+                  <input id="address" name="address" class="input" type="text" placeholder="Street, house" required />
+                </div>
+                <div class="input-group mt-2">
+                  <label for="dg-search">Find on map</label>
+                  <input id="dg-search" class="input" type="text" placeholder="Start typing an address…" />
+                </div>
+                <input type="hidden" id="latitude" name="latitude" />
+                <input type="hidden" id="longitude" name="longitude" />
+              </div>
+              <div id="dg-map-root" class="card" style="padding: 0; overflow: hidden;">
+                <div id="dg-map" style="width: 100%; height: 260px;"></div>
+              </div>
             </div>
             <div class="input-group mt-2">
               <label for="apartment">Apartment</label>
@@ -168,6 +181,8 @@
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
   <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/map_2gis.js"></script>
   <script src="js/calculator.js"></script>
 </body>
 </html>

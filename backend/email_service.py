@@ -42,8 +42,8 @@ def send_password_reset_email(email: str, reset_code: str) -> bool:
     """
     config = get_smtp_config()
     if not config:
-        # SMTP not configured, log instead
-        print(f"[EMAIL] Password reset code for {email}: {reset_code}")
+        # SMTP not configured (demo mode). Do not log sensitive codes.
+        print(f"[EMAIL] SMTP is not configured. Password reset email not sent to {email}.")
         return False
 
     try:
@@ -115,7 +115,7 @@ TazaBolsyn Team
 
     except Exception as e:
         print(f"[EMAIL ERROR] Failed to send email to {email}: {e}")
-        # Fallback: log the code
-        print(f"[EMAIL] Password reset code for {email}: {reset_code}")
+        # Fallback: do not log sensitive codes
         return False
+
 

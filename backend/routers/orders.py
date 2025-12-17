@@ -40,6 +40,8 @@ def create_order(
         apartment=payload.apartment,
         city=payload.city or current_user.city,
         phone=payload.phone,
+        latitude=payload.latitude,
+        longitude=payload.longitude,
     )
     db.add(order)
     db.flush()  # get order.id
@@ -76,6 +78,8 @@ def create_order(
         apartment=order.apartment,
         city=order.city,
         phone=order.phone,
+        latitude=order.latitude,
+        longitude=order.longitude,
         items=[
             schemas.OrderItem(
                 id=i.id,
@@ -118,6 +122,8 @@ def list_my_orders(
             apartment=o.apartment,
             city=o.city,
             phone=o.phone,
+            latitude=o.latitude,
+            longitude=o.longitude,
             items=[
                 schemas.OrderItem(
                     id=i.id,
@@ -130,5 +136,6 @@ def list_my_orders(
         )
         for o in orders
     ]
+
 
 
