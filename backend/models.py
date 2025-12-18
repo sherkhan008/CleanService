@@ -21,6 +21,7 @@ class User(Base):
     name = Column(String(100), nullable=True)
     surname = Column(String(100), nullable=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
+    phone = Column(String(50), nullable=True)
     password_hash = Column(String(255), nullable=False)
     role = Column(String(50), default="user", nullable=False)  # user | cleaner | admin
     totp_secret = Column(String(64), nullable=True)

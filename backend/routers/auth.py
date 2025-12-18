@@ -28,6 +28,7 @@ def _user_to_schema(user: models.User) -> schemas.User:
         name=user.name,
         surname=user.surname,
         email=user.email,
+        phone=user.phone,
         role=user.role,
         city=user.city,
         reward_points=user.reward_points,

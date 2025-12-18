@@ -18,6 +18,8 @@ def apply_sqlite_migrations(engine: Engine) -> None:
         # ---- users table ----
         # Add is_totp_enabled flag.
         if _sqlite_has_column(conn, "users", "id"):
+            if not _sqlite_has_column(conn, "users", "phone"):
+                conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR(50)"))
             if not _sqlite_has_column(conn, "users", "is_totp_enabled"):
                 conn.execute(
                     text(

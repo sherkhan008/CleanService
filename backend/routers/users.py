@@ -16,6 +16,7 @@ def _user_to_schema(user: models.User) -> schemas.User:
         name=user.name,
         surname=user.surname,
         email=user.email,
+        phone=user.phone,
         role=user.role,
         city=user.city,
         reward_points=user.reward_points,
@@ -57,6 +58,8 @@ def update_me(
         current_user.name = payload.name
     if payload.surname is not None:
         current_user.surname = payload.surname
+    if payload.phone is not None:
+        current_user.phone = payload.phone
     if payload.city is not None:
         current_user.city = payload.city
 

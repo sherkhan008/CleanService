@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TazaBolsyn – Cleaner Login</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/darkmode.css" />
+</head>
+<body data-page="cleaner-login">
+  <header class="site-header">
+    <div class="container">
+      <div class="nav">
+        <a href="homepage.html" class="logo">
+          <div class="logo-icon">TB</div>
+          <span>TazaBolsyn</span>
+        </a>
+        <nav class="nav-links">
+          <a href="homepage.html">Home</a>
+          <a href="calculation.html">Calculator</a>
+          <a href="cleaner_login.html" class="active">Cleaner login</a>
+          <a href="cleaner_signup.html">Cleaner sign up</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="theme-toggle" type="button" data-theme-toggle>
+            <span class="theme-toggle-icon theme-toggle-icon--light">🌙</span>
+            <span class="theme-toggle-icon theme-toggle-icon--dark">☀️</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <h1 class="auth-title">Cleaner portal</h1>
+        <p class="auth-subtitle">Log in to take orders and update cleaning statuses in real time.</p>
+
+        <div id="cleaner-login-message" class="auth-message hidden"></div>
+
+        <form id="cleaner-login-form" class="auth-form">
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input class="input" type="email" id="email" name="email" required placeholder="you@example.com" />
+          </div>
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input class="input" type="password" id="password" name="password" required placeholder="••••••••" />
+          </div>
+          <div id="cleaner-login-totp-group" class="input-group hidden">
+            <label for="totp">2FA Code</label>
+            <input
+              class="input totp-input"
+              type="text"
+              id="totp"
+              name="totp"
+              inputmode="numeric"
+              maxlength="6"
+              pattern="\\d{6}"
+              placeholder="123456"
+            />
+            <span class="text-xs text-muted">Open your authenticator app to view your 6-digit code.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-pill">Login</button>
+        </form>
+
+        <div class="auth-footer">
+          <div><a href="cleaner_forgot.html">Forgot your password?</a></div>
+          <div>New cleaner? <a href="cleaner_signup.html">Create cleaner account</a></div>
+          <div class="text-xs text-muted" style="margin-top: 0.5rem;">
+            Customer login: <a href="login.html">go here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> TazaBolsyn. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/cleaner_auth.js"></script>
+</body>
+</html>
+
+

@@ -78,6 +78,7 @@ class UserBase(BaseModel):
     name: Optional[str] = None
     surname: Optional[str] = None
     email: EmailStr
+    phone: Optional[str] = None
     city: Optional[str] = None
 
 
@@ -89,6 +90,7 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     surname: Optional[str] = None
+    phone: Optional[str] = None
     city: Optional[str] = None
 
 
@@ -143,7 +145,24 @@ class CleanerAccountCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     surname: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
+    phone: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=8)
+    city: Optional[str] = None
+
+
+class CleanerLoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+    totp_code: Optional[str] = None
+
+
+class CleanerSignupRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    surname: str = Field(..., min_length=1, max_length=100)
+    email: EmailStr
+    phone: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=8)
+    password_confirm: str = Field(..., min_length=8)
     city: Optional[str] = None
 
 
