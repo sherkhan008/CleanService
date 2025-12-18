@@ -7,6 +7,7 @@ from pydantic import BaseModel, EmailStr, Field
 # Shared / nested schemas
 
 
+
 class AddressBase(BaseModel):
     address: str = Field(..., max_length=255)
     apartment: Optional[str] = Field(default=None, max_length=50)
@@ -126,7 +127,7 @@ class PasswordResetRequest(BaseModel):
 
 class PasswordResetConfirm(BaseModel):
     email: EmailStr
-    code: str = Field(..., min_length=6, max_length=6)
+    code: str = Field(..., min_length=6, max_length=6, regex=r"^\d{6}$")
     new_password: str = Field(..., min_length=8)
 
 

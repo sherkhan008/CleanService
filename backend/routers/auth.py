@@ -164,8 +164,12 @@ def reset_password(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid reset code",
         )
-
-    if not user.reset_expires_at or user.reset_expires_at < datetime.now(timezone.utc):
+    now = datetime.now(timezone.utc)
+    reset_expires_at = user.reset_expires_at
+    if reset_expires_at is not None and reset_expires_at.tzinfo is None:
+        reset_expires_at = reset_expires_at.replace(tzinfo=timezone.utc)
+    #if not user.reset_expires_at or user.reset_expires_at < datetime.now(timezone.utc):
+    if not reset_expires_at or reset_expires_at < now:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Reset code has expired",
