@@ -280,10 +280,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         totpStatus.textContent = "Pending";
         totpBtn.disabled = true;
-        const qrUrl = `data:image/png;base64,${data.qr_code_base64}`;
+        // Ensure QR code base64 is properly formatted
+        const qrBase64 = data.qr_code_base64 || data.qr_code_base64;
+        const qrUrl = qrBase64.startsWith('data:') ? qrBase64 : `data:image/png;base64,${qrBase64}`;
         totpInfo.innerHTML = `
           <p class="text-sm mb-2">Scan this QR code with Google Authenticator (or similar), then enter the 6-digit code to activate.</p>
-          <img src="${qrUrl}" alt="TOTP QR code" />
+          <div style="text-align: center; margin: 1rem 0;">
+            <img src="${qrUrl}" alt="TOTP QR code" style="max-width: 250px; height: auto; border: 1px solid var(--color-border); padding: 0.5rem; background: white;" />
+          </div>
           <div class="input-group mt-3" style="max-width: 260px;">
             <label for="totp-verify-code">6-digit code</label>
             <input class="input totp-input" id="totp-verify-code" inputmode="numeric" maxlength="6" pattern="\\d{6}" placeholder="123456" />

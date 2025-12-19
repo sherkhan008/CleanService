@@ -19,6 +19,7 @@ def create_order(
     """
     Create a new cleaning order for the current user.
     Total price is calculated from the provided items.
+    City-based pricing is already applied in frontend, so we use the prices as-is.
     """
     if not payload.items:
         raise HTTPException(
@@ -26,6 +27,7 @@ def create_order(
             detail="At least one service must be selected.",
         )
 
+    # Prices are already adjusted by city in frontend, so we use them directly
     total_price = sum(i.price * i.quantity for i in payload.items)
     order = models.Order(
         user_id=current_user.id,

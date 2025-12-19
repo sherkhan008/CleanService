@@ -23,6 +23,18 @@ const SERVICES = [
   { key: "key_delivery", name: "Key delivery", price: 2000 },
 ];
 
+// Cities with standard pricing (no discount)
+const STANDARD_PRICE_CITIES = ["Almaty", "Astana", "Shymkent"];
+const CITY_DISCOUNT = 500; // Discount in tenge for other cities
+
+// Get service price based on city
+function getServicePrice(service, city) {
+  if (!city || STANDARD_PRICE_CITIES.includes(city)) {
+    return service.price;
+  }
+  return Math.max(0, service.price - CITY_DISCOUNT);
+}
+
 function getTokenCalc() {
   return localStorage.getItem(TOKEN_KEY);
 }
@@ -110,7 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderServices() {
     if (!servicesContainer) return;
     servicesContainer.innerHTML = "";
+    const currentCity = citySelect ? citySelect.value : "";
     SERVICES.forEach((s) => {
+      const displayPrice = getServicePrice(s, currentCity);
+      const isDiscounted = displayPrice < s.price;
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
@@ -120,11 +135,15 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           <div>
             <div class="feature-title">${s.name}</div>
-            <div class="text-sm text-muted">${s.price.toLocaleString()} ₸</div>
+            <div class="text-sm text-muted">
+              ${isDiscounted ? `<span style="text-decoration: line-through; color: var(--color-muted);">${s.price.toLocaleString()} ₸</span> ` : ""}
+              <span style="color: ${isDiscounted ? 'var(--color-primary);' : 'inherit;'}">${displayPrice.toLocaleString()} ₸</span>
+              ${isDiscounted ? ` <span class="text-xs" style="color: var(--color-primary);">(-${CITY_DISCOUNT}₸)</span>` : ""}
+            </div>
           </div>
         </div>
         <div class="flex items-center justify-between mt-2">
-          <div class="chip">Price: <strong>${s.price.toLocaleString()} ₸</strong></div>
+          <div class="chip">Price: <strong>${displayPrice.toLocaleString()} ₸</strong></div>
           <div class="flex items-center gap-2">
             <button class="btn btn-outline btn-pill" data-minus="${s.key}">−</button>
             <div data-qty="${s.key}" class="text-sm" style="min-width: 2rem; text-align: center;">0</div>
@@ -153,6 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!receiptList || !totalEl) return;
     receiptList.innerHTML = "";
     let total = 0;
+    const currentCity = citySelect ? citySelect.value : "";
 
     if (state.basePrice > 0) {
       const li = document.createElement("div");
@@ -162,22 +182,17 @@ document.addEventListener("DOMContentLoaded", () => {
       total += state.basePrice;
     }
 
-    SERVICES.forEach((s) => {
-      const qty = state.services[s.key] || 0;
-      if (!qty) return;
-      const itemTotal = qty * s.price;
-      total += itemTotal;
-      const li = new DocumentFragment();
-    });
-
-    // Render again with actual DOM elements
+    // Render services with city-based pricing
     Object.entries(state.services).forEach(([key, qty]) => {
       const service = SERVICES.find((s) => s.key === key);
       if (!service || !qty) return;
-      const itemTotal = qty * service.price;
+      const servicePrice = getServicePrice(service, currentCity);
+      const itemTotal = qty * servicePrice;
+      total += itemTotal;
       const row = document.createElement("div");
       row.className = "flex justify-between text-sm mt-1";
-      row.innerHTML = `<span>${service.name} ×${qty}</span><span>${itemTotal.toLocaleString()} ₸</span>`;
+      const isDiscounted = servicePrice < service.price;
+      row.innerHTML = `<span>${service.name} ×${qty}</span><span>${itemTotal.toLocaleString()} ₸${isDiscounted ? ` <span class="text-xs text-muted">(${servicePrice.toLocaleString()}₸ each)</span>` : ""}</span>`;
       receiptList.appendChild(row);
     });
 
@@ -193,6 +208,24 @@ document.addEventListener("DOMContentLoaded", () => {
   if (cleaningTypeSelect) {
     cleaningTypeSelect.addEventListener("change", updateBasePrice);
   }
+  if (citySelect) {
+    citySelect.addEventListener("change", () => {
+      updateCityDiscountNote();
+      renderServices();
+      renderReceipt();
+    });
+  }
+
+  function updateCityDiscountNote() {
+    const note = document.getElementById("city-discount-note");
+    if (!note || !citySelect) return;
+    const city = citySelect.value;
+    if (city && !STANDARD_PRICE_CITIES.includes(city)) {
+      note.style.display = "block";
+    } else {
+      note.style.display = "none";
+    }
+  }
 
   if (orderForm) {
     orderForm.addEventListener("submit", async (e) => {
@@ -205,13 +238,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const items = [];
+      const selectedCity = orderForm.city.value.trim() || null;
       SERVICES.forEach((s) => {
         const qty = state.services[s.key] || 0;
         if (qty > 0) {
+          const servicePrice = getServicePrice(s, selectedCity);
           items.push({
             service_name: s.name,
             quantity: qty,
-            price: s.price,
+            price: servicePrice, // Use city-adjusted price
           });
         }
       });
@@ -257,7 +292,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderServices();
   updateBasePrice();
-  loadUserCity();
+  loadUserCity().then(() => {
+    updateCityDiscountNote();
+    renderServices();
+    renderReceipt();
+  });
 });
 
 
