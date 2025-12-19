@@ -4,8 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
-from ..auth import require_role
-from ..auth import get_password_hash
+from ..auth import require_role, get_password_hash
 from ..database import get_db
 
 router = APIRouter()
@@ -287,6 +286,35 @@ def update_order_admin(
     db.commit()
     db.refresh(order)
     return _order_to_schema(order)
+
+
+@router.get("/feedbacks", response_model=List[schemas.Feedback])
+def list_feedbacks(
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(require_role("admin")),
+) -> List[schemas.Feedback]:
+    """
+    List all feedbacks (admin only).
+    """
+    feedbacks = db.query(models.Feedback).order_by(models.Feedback.created_at.desc()).all()
+    return [
+        schemas.Feedback(
+            id=f.id,
+            order_id=f.order_id,
+            user_id=f.user_id,
+            comment=f.comment,
+            rating=f.rating,
+            created_at=f.created_at,
+            user=schemas.UserBase(
+                name=f.user.name,
+                surname=f.user.surname,
+                email=f.user.email,
+                phone=f.user.phone,
+                city=f.user.city,
+            ) if f.user else None,
+        )
+        for f in feedbacks
+    ]
 
 
 

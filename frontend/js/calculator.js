@@ -20,7 +20,7 @@ const SERVICES = [
   { key: "dishwasher", name: "Dishwasher", price: 2000 },
   { key: "curtains", name: "Curtains", price: 2500 },
   { key: "ceiling", name: "Ceiling (per m²)", price: 1500 },
-  { key: "key_delivery", name: "Key delivery", price: 0 },
+  { key: "key_delivery", name: "Key delivery", price: 2000 },
 ];
 
 function getTokenCalc() {

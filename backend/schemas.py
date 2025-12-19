@@ -198,3 +198,22 @@ class StatusUpdate(BaseModel):
     status: str
 
 
+class FeedbackCreate(BaseModel):
+    order_id: int
+    comment: str = Field(..., min_length=1, max_length=1000)
+    rating: Optional[int] = Field(default=None, ge=1, le=5)
+
+
+class Feedback(BaseModel):
+    id: int
+    order_id: int
+    user_id: int
+    comment: str
+    rating: Optional[int] = None
+    created_at: datetime
+    user: Optional[UserBase] = None
+
+    class Config:
+        orm_mode = True
+
+

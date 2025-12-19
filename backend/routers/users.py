@@ -180,4 +180,70 @@ def list_my_orders(
     ]
 
 
+@router.post("/me/feedback", response_model=schemas.Feedback, status_code=status.HTTP_201_CREATED)
+def create_feedback(
+    payload: schemas.FeedbackCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+) -> schemas.Feedback:
+    """
+    Create feedback for a completed order.
+    """
+    # Verify order belongs to user and is completed
+    order = db.query(models.Order).filter(
+        models.Order.id == payload.order_id,
+        models.Order.user_id == current_user.id
+    ).first()
+    
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found or does not belong to you"
+        )
+    
+    if order.status not in ["finished", "paid"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Feedback can only be submitted for completed orders (finished or paid)"
+        )
+    
+    # Check if feedback already exists
+    existing = db.query(models.Feedback).filter(
+        models.Feedback.order_id == payload.order_id,
+        models.Feedback.user_id == current_user.id
+    ).first()
+    
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Feedback already submitted for this order"
+        )
+    
+    feedback = models.Feedback(
+        order_id=payload.order_id,
+        user_id=current_user.id,
+        comment=payload.comment,
+        rating=payload.rating,
+    )
+    db.add(feedback)
+    db.commit()
+    db.refresh(feedback)
+    
+    return schemas.Feedback(
+        id=feedback.id,
+        order_id=feedback.order_id,
+        user_id=feedback.user_id,
+        comment=feedback.comment,
+        rating=feedback.rating,
+        created_at=feedback.created_at,
+        user=schemas.UserBase(
+            name=current_user.name,
+            surname=current_user.surname,
+            email=current_user.email,
+            phone=current_user.phone,
+            city=current_user.city,
+        ),
+    )
+
+
 

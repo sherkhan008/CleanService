@@ -1,26 +1,63 @@
 from pathlib import Path
+import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
 
 # Load environment variables from .env file (if present)
 load_dotenv()
 
 # IMPORTANT: use package-relative import so `backend` works as a package
-from .database import Base, engine
+from .database import Base, engine, SessionLocal
 from .utils.db_migrations import apply_sqlite_migrations
 from .routers import auth as auth_router
 from .routers import users as users_router
 from .routers import orders as orders_router
 from .routers import cleaners as cleaners_router
 from .routers import admin as admin_router
+from . import models
+from .auth import get_password_hash
 
 # Create database tables (for development / simple deployments).
 # In production, prefer using Alembic migrations.
 Base.metadata.create_all(bind=engine)
 apply_sqlite_migrations(engine)
+
+# Seed admin account if it doesn't exist
+def seed_admin_account():
+    """Create default admin account if it doesn't exist."""
+    db: Session = SessionLocal()
+    try:
+        admin_email = os.getenv("ADMIN_EMAIL", "admin@tazabolsyn.com")
+        admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+        
+        existing_admin = db.query(models.User).filter(
+            models.User.email == admin_email
+        ).first()
+        
+        if not existing_admin:
+            admin_user = models.User(
+                name="Admin",
+                surname="User",
+                email=admin_email,
+                password_hash=get_password_hash(admin_password),
+                role="admin",
+            )
+            db.add(admin_user)
+            db.commit()
+            print(f"✓ Admin account created: {admin_email} / {admin_password}")
+        else:
+            print(f"✓ Admin account already exists: {admin_email}")
+    except Exception as e:
+        print(f"✗ Error seeding admin account: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+seed_admin_account()
 
 app = FastAPI(title="TazaBolsyn API", version="1.0.0")
 

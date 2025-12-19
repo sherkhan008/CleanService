@@ -130,18 +130,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function fetchOrders() {
     if (!ordersTbody) return;
-    ordersTbody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
+      ordersTbody.innerHTML = "<tr><td colspan='7'>Loading...</td></tr>";
     try {
       const res = await fetch(`${API_BASE}/orders/me`, {
         headers: authHeaders(),
       });
       if (!res.ok) {
-        ordersTbody.innerHTML = "<tr><td colspan='6'>Failed to load orders.</td></tr>";
+        ordersTbody.innerHTML = "<tr><td colspan='7'>Failed to load orders.</td></tr>";
         return;
       }
       const orders = await res.json();
       if (!orders.length) {
-        ordersTbody.innerHTML = "<tr><td colspan='6'>No orders yet.</td></tr>";
+        ordersTbody.innerHTML = "<tr><td colspan='7'>No orders yet.</td></tr>";
         return;
       }
       ordersTbody.innerHTML = "";
@@ -152,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const itemsSummary = o.items
           .map((i) => `${i.service_name} ×${i.quantity}`)
           .join(", ");
+        const canLeaveFeedback = (o.status === "finished" || o.status === "paid");
         tr.innerHTML = `
           <td>#${o.id}</td>
           <td>${date.toLocaleDateString()}<br/><span class="text-xs text-muted">${date.toLocaleTimeString()}</span></td>
@@ -159,12 +160,23 @@ document.addEventListener("DOMContentLoaded", () => {
           <td><span class="${statusClass}">${o.status}</span></td>
           <td>${o.total_price.toLocaleString()} ₸</td>
           <td class="text-xs">${itemsSummary || "-"}</td>
+          <td>
+            ${canLeaveFeedback ? `<button class="btn btn-outline btn-pill text-xs" data-leave-feedback="${o.id}">Leave Feedback</button>` : "-"}
+          </td>
         `;
         ordersTbody.appendChild(tr);
       });
+      
+      // Add feedback button handlers
+      ordersTbody.querySelectorAll("[data-leave-feedback]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const orderId = parseInt(btn.getAttribute("data-leave-feedback"));
+          showFeedbackModal(orderId);
+        });
+      });
     } catch (err) {
       console.error(err);
-      ordersTbody.innerHTML = "<tr><td colspan='6'>Error loading orders.</td></tr>";
+      ordersTbody.innerHTML = "<tr><td colspan='7'>Error loading orders.</td></tr>";
     }
   }
 
@@ -325,6 +337,82 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
       window.location.href = "login.html";
+    });
+  }
+
+  function showFeedbackModal(orderId) {
+    const modal = document.createElement("div");
+    modal.className = "modal-overlay";
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 500px;">
+        <h3 class="feature-title">Leave Feedback</h3>
+        <form id="feedback-form">
+          <input type="hidden" name="order_id" value="${orderId}" />
+          <div class="input-group mt-3">
+            <label for="feedback-rating">Rating (optional)</label>
+            <select id="feedback-rating" name="rating" class="select">
+              <option value="">No rating</option>
+              <option value="5">5 - Excellent</option>
+              <option value="4">4 - Very Good</option>
+              <option value="3">3 - Good</option>
+              <option value="2">2 - Fair</option>
+              <option value="1">1 - Poor</option>
+            </select>
+          </div>
+          <div class="input-group mt-3">
+            <label for="feedback-comment">Comment *</label>
+            <textarea id="feedback-comment" name="comment" class="input" rows="4" required placeholder="Share your experience..."></textarea>
+          </div>
+          <div class="flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary btn-pill">Submit Feedback</button>
+            <button type="button" class="btn btn-outline btn-pill" data-close-modal>Cancel</button>
+          </div>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    modal.querySelector("[data-close-modal]").addEventListener("click", () => {
+      document.body.removeChild(modal);
+    });
+    
+    modal.querySelector("#feedback-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const body = {
+        order_id: parseInt(form.order_id.value),
+        comment: form.comment.value.trim(),
+        rating: form.rating.value ? parseInt(form.rating.value) : null,
+      };
+      
+      if (!body.comment) {
+        if (window.notify) window.notify.error("Please enter a comment.");
+        return;
+      }
+      
+      try {
+        const res = await fetch(`${API_BASE}/users/me/feedback`, {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          const friendly = data?.detail === "Feedback already submitted for this order"
+            ? "You have already submitted feedback for this order."
+            : data?.detail === "Feedback can only be submitted for completed orders (finished or paid)"
+            ? "Feedback can only be submitted for completed orders."
+            : "Could not submit feedback. Please try again.";
+          if (window.notify) window.notify.error(friendly);
+          return;
+        }
+        if (window.notify) window.notify.success("Feedback submitted successfully.");
+        document.body.removeChild(modal);
+        fetchOrders();
+      } catch (err) {
+        console.error(err);
+        if (window.notify) window.notify.error("Network error. Please try again.");
+      }
     });
   }
 

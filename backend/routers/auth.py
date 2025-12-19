@@ -187,12 +187,13 @@ def reset_password(
 
 @router.post(
     "/totp/setup",
+    response_model=schemas.TotpSetupResponse,
     dependencies=[Depends(rate_limit("auth:totp-setup", limit=3, window_seconds=300))],
 )
 def setup_totp(
     current_user: models.User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
-) -> dict:
+) -> schemas.TotpSetupResponse:
     """
     Start TOTP setup for the current user and return a QR code (base64 PNG).
     2FA is only marked enabled after successful verification.
@@ -222,7 +223,7 @@ def setup_totp(
     return schemas.TotpSetupResponse(
         qr_code_base64=qr_b64,
         message="Scan the QR code in your authenticator app, then enter the 6-digit code to finish setup.",
-    ).dict()
+    )
 
 
 @router.post(

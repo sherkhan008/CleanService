@@ -112,3 +112,17 @@ class Cleaner(Base):
     user = relationship("User", back_populates="cleaner_profile")
 
 
+class Feedback(Base):
+    __tablename__ = "feedbacks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    comment = Column(String(1000), nullable=False)
+    rating = Column(Integer, nullable=True)  # Optional rating 1-5
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    order = relationship("Order", foreign_keys=[order_id])
+    user = relationship("User", foreign_keys=[user_id])
+
+

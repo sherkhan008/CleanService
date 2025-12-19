@@ -254,9 +254,59 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  async function loadFeedbacks() {
+    const feedbacksList = document.getElementById("admin-feedbacks-list");
+    if (!feedbacksList) return;
+    
+    feedbacksList.innerHTML = "<p>Loading feedbacks...</p>";
+    try {
+      const res = await fetch(`${API_BASE_ADMIN}/admin/feedbacks`, {
+        headers: authHeadersAdmin(),
+      });
+      if (!res.ok) {
+        feedbacksList.innerHTML = "<p class='text-muted'>Failed to load feedbacks.</p>";
+        return;
+      }
+      const feedbacks = await res.json();
+      if (!feedbacks.length) {
+        feedbacksList.innerHTML = "<p class='text-muted'>No feedbacks yet.</p>";
+        return;
+      }
+      feedbacksList.innerHTML = "";
+      feedbacks.forEach((f) => {
+        const card = document.createElement("div");
+        card.className = "card mt-3";
+        const date = new Date(f.created_at);
+        const ratingStars = f.rating ? "⭐".repeat(f.rating) : "No rating";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div style="flex: 1;">
+              <div class="flex items-center gap-2 mb-2">
+                <strong>Order #${f.order_id}</strong>
+                ${f.rating ? `<span class="text-sm">${ratingStars}</span>` : ""}
+              </div>
+              <p class="text-sm text-muted mb-2">
+                By: ${f.user?.name || ""} ${f.user?.surname || ""} (${f.user?.email || ""})
+              </p>
+              <p class="text-sm">${f.comment}</p>
+              <p class="text-xs text-muted mt-2">
+                ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+        `;
+        feedbacksList.appendChild(card);
+      });
+    } catch (err) {
+      console.error(err);
+      feedbacksList.innerHTML = "<p class='text-muted'>Error loading feedbacks.</p>";
+    }
+  }
+
   loadUsers();
   loadCleaners();
   loadOrders();
+  loadFeedbacks();
 });
 
 
